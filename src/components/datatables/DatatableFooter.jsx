@@ -57,9 +57,7 @@ const DatatableFooter = ({ currentPage = 0, totalPage = 0, next, previous, gotoP
 
     return (
         <Container id="table_pagination">
-            <ShowingInfo>
-                Display page {currentPage} of {totalPage}
-            </ShowingInfo>
+            <ShowingInfo></ShowingInfo>
 
             <div className="flex items-center space-x-2">
                 <button
@@ -194,5 +192,5 @@ const Container = styled.div.attrs(() => ({
 }))``;
 
 const ShowingInfo = styled.div.attrs(() => ({
-    className: "inline-block px-6 py-2 text-sm tracking-wide text-indigo-400 border rounded-md"
+    className: "inline-block"
 }))``;

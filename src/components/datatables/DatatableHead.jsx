@@ -1,18 +1,13 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 
 import { Loader } from "../utils";
 
 const DatatableHead = ({
-    data,
     searchValue = "",
     onChangeSearchValue,
     numberPerPage = 7,
     onChangeNumberPerPage,
-    onClick,
-    addButton,
-    checkAll,
     loading = false,
     paginateData = null
 }) => {
@@ -24,33 +19,14 @@ const DatatableHead = ({
                     <option value={10}>10</option>
                     <option value={20}>20</option>
                     <option value={50}>50</option>
-                    <option value={50}>100</option>
+                    <option value={100}>100</option>
                 </Select>
-
-                {addButton &&
-                    (addButton.type === "link" ? (
-                        <NavLink
-                            to={addButton.url}
-                            className={
-                                "px-6 py-2 text-xs font-light text-white transition duration-300 bg-indigo-600 rounded shadow-xl hover:shadow-none"
-                            }
-                        >
-                            {addButton.text}
-                        </NavLink>
-                    ) : (
-                        <>
-                            <Button onClick={addButton.click} color={"indigo"} varient={"600"}>
-                                {addButton.text}
-                            </Button>
-
-                            {addButton.form}
-                        </>
-                    ))}
             </LeftContainer>
 
             <RightContainer>
                 <div className="relative">
                     <Input
+                        className="max-sm:w-20"
                         type="text"
                         placeholder="Search..."
                         value={searchValue}
@@ -78,12 +54,6 @@ const DatatableHead = ({
                         </InputIcon>
                     )}
                 </div>
-
-                {checkAll && data.filter(item => item.checked).length > 0 && (
-                    <Button onClick={onClick} color={"red"} varient={"500"}>
-                        Delete
-                    </Button>
-                )}
             </RightContainer>
         </Container>
     );
@@ -92,15 +62,15 @@ const DatatableHead = ({
 export default DatatableHead;
 
 const Container = styled.div.attrs(() => ({
-    className: "flex items-center justify-between p-5"
+    className: "flex items-center justify-between"
 }))``;
 
 const LeftContainer = styled.div.attrs(() => ({
-    className: "flex items-center space-x-3"
+    className: "flex items-center"
 }))``;
 
 const RightContainer = styled.div.attrs(() => ({
-    className: "flex items-center space-x-3"
+    className: "flex items-center lg:"
 }))``;
 
 const Select = styled.select.attrs(() => ({
@@ -110,10 +80,6 @@ const Select = styled.select.attrs(() => ({
 
 const SelectLabel = styled.span.attrs(() => ({
     className: "text-sm text-gray-500"
-}))``;
-
-const Button = styled.button.attrs(props => ({
-    className: `px-6 py-2 text-xs font-light text-white transition duration-300 bg-${props.color}-${props.varient} rounded shadow-xl hover:shadow-none`
 }))``;
 
 const Input = styled.input.attrs(() => ({

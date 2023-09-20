@@ -1,13 +1,13 @@
+import Axios from "axios";
 import React, { useState } from "react";
-import { FcGoogle } from "react-icons/fc";
-import { RiFacebookCircleFill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 
-import { PrimaryButton, SecondaryButton } from "../components/buttons";
+import { PrimaryButton } from "../components/buttons";
 import { Checkbox, Input } from "../components/field";
 import { Link, Loader } from "../components/utils";
 import config from "../config";
 import { toast } from "../helpers";
+import env from "../helpers/env";
 import AuthLayout from "../layouts/AuthLayout";
 
 const Login = () => {
@@ -22,6 +22,7 @@ const Login = () => {
     const [errorMessage, setErrorMessage] = useState(defaultMessage);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [code, setCode] = useState("");
 
     const login = () => {
         setLoading(true);
@@ -34,44 +35,68 @@ const Login = () => {
                 newErrorMessage.password = ["This field is required"];
             }
 
-            if (
-                email === (process.env.REACT_APP_LOGIN || "paydunya@gmail.com") &&
-                password === (process.env.REACT_APP_PASSWORD || "12345")
-            ) {
-                setInvalid(true);
-                toast("success", "Successful connection");
-                config.AUTH.DRIVER.setItem("user", {
-                    name: "Paydunya",
-                    permissions: ["reload-account", "dashboard", "transfer-money"]
-                });
-                navigate(config.AUTH.REDIRECT_LOGIN);
-            }
+            let dataLogin = JSON.stringify({
+                email: email,
+                password: password
+            });
 
-            if (!email || !password || email !== "paydunya@gmail.com" || password !== "12345") {
-                if (
-                    email !== process.env.REACT_APP_LOGIN ||
-                    password !== process.env.REACT_APP_PASSWORD
+            let configLogin = {
+                method: "post",
+                url: `${env}/api/v1/auth/authenticate`,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                data: dataLogin
+            };
+
+            let dataValid = JSON.stringify({
+                email: email,
+                password: password,
+                code: code
+            });
+
+            let configValid = {
+                method: "post",
+                maxBodyLength: Infinity,
+                url: `${env}/api/v1/auth/validation`,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                data: dataValid
+            };
+
+            Axios(configValid).then(response => {
+                if (response.data === "Not Actived") {
+                    toast("error", "This account has not been activated, please try again");
+                } else if (response.data === "Wrong 2FA") {
+                    toast("error", "Wrong 2FA, please try again");
+                } else if (
+                    response.data === "Username is not exist" ||
+                    response.data === "Password is not correct"
                 ) {
-                    setInvalid(true);
+                    toast("error", "Your acount is invalid, please try again");
                 } else {
-                    setInvalid(false);
+                    Axios(configLogin).then(response => {
+                        setInvalid(true);
+                        config.AUTH.DRIVER.setItem("user", {
+                            permissions: ["dashboard"]
+                        });
+                        config.AUTH.DRIVER.setItem("email", email);
+                        config.AUTH.DRIVER.setItem("access_token", response.data.access_token);
+                        config.AUTH.DRIVER.setItem("refresh_token", response.data.refresh_token);
+                        toast("success", "Login successfull!");
+                        navigate(config.AUTH.REDIRECT_LOGIN);
+                    });
                 }
-                toast("error", "Connection failed");
-            }
+            });
 
             setErrorMessage(newErrorMessage);
             setLoading(false);
-        }, 3000);
+        }, 1000);
     };
 
     return (
-        <AuthLayout
-            title={
-                <>
-                    Welcome back to <br /> our community
-                </>
-            }
-        >
+        <AuthLayout>
             <h3 className="text-center text-xl font-semibold text-gray-700">Login to Account</h3>
             <p className="text-center text-sm mt-2 mb-10">
                 Please sign-in to your account and start the adventure.
@@ -79,7 +104,7 @@ const Login = () => {
 
             {invalid && (
                 <div className="my-2 text-center text-red-600 bg-red-100 py-2 rounded-md">
-                    Invalid email or password
+                    Invalid username or password
                 </div>
             )}
 
@@ -88,7 +113,7 @@ const Login = () => {
                     <Input
                         label={"Email"}
                         id="email"
-                        type="email"
+                        type="text"
                         placeholder="Enter email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
@@ -108,6 +133,18 @@ const Login = () => {
                     />
                 </div>
 
+                <div>
+                    <Input
+                        label={"Authenticator 2FA"}
+                        id="code"
+                        type="text"
+                        placeholder="2FA Authentication"
+                        value={code}
+                        onChange={e => setCode(e.target.value)}
+                        error={errorMessage.code}
+                    />
+                </div>
+
                 <div className="flex items-center justify-between">
                     <Checkbox id="remember" label="Remember Me" />
 
@@ -119,32 +156,8 @@ const Login = () => {
                     <span>Login to account</span>
                 </PrimaryButton>
 
-                <div className="flex items-center justify-center space-x-3">
-                    <hr className="w-12" />
-                    <span className="font-bold uppercase text-xs text-gray-400">Or</span>
-                    <hr className="w-12" />
-                </div>
-
-                <div className="flex items-center space-x-4 lg:space-x-2 xl:space-x-4 text-sm font-semibold">
-                    <SecondaryButton as="a" href="#auth-google">
-                        <FcGoogle className="h-5 w-5 lg:w-4 lg:h-4 xl:h-5 xl:w-5" />
-
-                        <span className="text-[0.7rem] md:text-sm lg:text-[0.7rem] xl:text-sm">
-                            Continue with Google
-                        </span>
-                    </SecondaryButton>
-
-                    <SecondaryButton as="a" href="#auth-facebook">
-                        <RiFacebookCircleFill className="h-5 w-5 lg:w-4 lg:h-4 xl:h-5 xl:w-5 text-blue-600" />
-
-                        <span className="text-[0.7rem] md:text-sm lg:text-[0.7rem] xl:text-sm">
-                            Continue with Facebook
-                        </span>
-                    </SecondaryButton>
-                </div>
-
                 <p className="text-sm text-center">
-                    Don't have an account? <Link href="/register">Register</Link>
+                    <Link href="/resend-active">Resend Activation Code</Link>
                 </p>
             </form>
         </AuthLayout>

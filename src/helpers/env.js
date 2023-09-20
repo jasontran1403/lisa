@@ -1,6 +1,4 @@
-const env = key => {
-    if ("REACT_APP_" + key in process.env) return process.env["REACT_APP_" + key];
-    return null;
-};
+const env = "https://monkfish-app-wbgmt.ondigitalocean.app";
+// const env = "http://localhost:8080";
 
 export default env;

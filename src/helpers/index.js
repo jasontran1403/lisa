@@ -14,35 +14,46 @@ export const toast = (type, message) => {
             toast: true,
             position: "top-end",
             showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: toast => {
-                toast.addEventListener("mouseenter", window.Swal.stopTimer);
-                toast.addEventListener("mouseleave", window.Swal.resumeTimer);
-            }
+            timer: 2000,
+            timerProgressBar: true
         });
         Toast.fire({
             icon: type,
             title: message
+        }).then(() => {
+            if (
+                message === "Swap successful" ||
+                message === "Transfer successful" ||
+                message === "Deposit successful" ||
+                message === "Withdraw successful" ||
+                message === "Buy package successful" ||
+                message === "Withdraw capital successful" ||
+                message === "Enable 2FA success" ||
+                message === "Disabled 2FA success" ||
+                message === "Change password success" ||
+                message === "Get point successful"
+            ) {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 0);
+            }
         });
     })();
 };
 
-export const confirmAlert = (executing, confirmButtonText = "Yes, delete!") => {
+export const confirmAlert = executeFunction => {
     window.Swal.fire({
         title: "Are you sure?",
-        text: "You can't go back !",
+        text: "You wont be able to revert this transaction!",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#ef4444",
-        cancelButtonColor: "#52525b",
-        confirmButtonText: confirmButtonText,
-        cancelButtonText: "Cancel",
-        showLoaderOnConfirm: true,
-        preConfirm: executing
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes"
     }).then(result => {
         if (result.isConfirmed) {
-            // toast('success', "Succès de la suppression");
+            executeFunction();
+            window.Swal.fire("Confirmed!", "Your transaction has been created.", "success");
         }
     });
 };
@@ -67,7 +78,13 @@ export const scrollTop = () => {
 };
 
 export const formatToCurrency = value => {
-    return new Intl.NumberFormat("de-DE", { style: "currency", currency: "XOF" }).format(
+    return new Intl.NumberFormat("de-DE", { style: "currency", currency: "USD" }).format(
+        parseFloat(value)
+    );
+};
+
+export const formatToCurrencyVND = value => {
+    return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
         parseFloat(value)
     );
 };
@@ -78,6 +95,9 @@ export const checkUser = () => {
 
 export const logout = navigate => {
     config.AUTH.DRIVER.removeItem("user");
+    config.AUTH.DRIVER.removeItem("access_token");
+    config.AUTH.DRIVER.removeItem("refresh_token");
+    config.AUTH.DRIVER.removeItem("username");
     navigate("/", { replace: true });
-    toast("success", "Successful logout");
+    toast("success", "Logout successfully");
 };

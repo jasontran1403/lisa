@@ -1,4 +1,4 @@
-export const RELOAD_ACCOUNT_HISTORY = [
+export const data2FromFile = [
     {
         id: 1,
         registerNumber: "#081451",

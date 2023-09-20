@@ -1,32 +1,10 @@
 import React from "react";
 import styled from "styled-components";
 
-const TableHead = ({
-    head = [],
-    checkAll = true,
-    checkValue = false,
-    onChangeCheckValue,
-    sort = null,
-    onSort,
-    viewButton,
-    editButton,
-    deleteButton,
-    paginateData = null
-}) => {
+const TableHead = ({ head = [], sort = null, onSort, paginateData = null }) => {
     return (
         <Container>
             <tr>
-                {checkAll && (
-                    <CheckboxContainer>
-                        <input
-                            className="w-4 h-4 bg-gray-300 border-none rounded cursor-pointer form-checkbox focus:ring-0"
-                            type="checkbox"
-                            checked={checkValue}
-                            onChange={e => onChangeCheckValue(e.target.checked)}
-                        />
-                    </CheckboxContainer>
-                )}
-
                 {head.map((item, index) => (
                     <HeadItem onClick={() => onSort(index)} key={index}>
                         <HeadItemContainer>
@@ -64,10 +42,6 @@ const TableHead = ({
                         </HeadItemContainer>
                     </HeadItem>
                 ))}
-
-                {(viewButton !== null || editButton !== null || deleteButton !== null) && (
-                    <HeadItem position={"center"}>Actions</HeadItem>
-                )}
             </tr>
         </Container>
     );
@@ -77,10 +51,6 @@ export default TableHead;
 
 const Container = styled.thead.attrs(() => ({
     className: ""
-}))``;
-
-const CheckboxContainer = styled.th.attrs(() => ({
-    className: "w-10 px-4 py-2 font-normal text-left text-gray-600"
 }))``;
 
 const HeadItem = styled.th.attrs(props => ({
@@ -98,7 +68,6 @@ const ChevronContainer = styled.div.attrs(() => ({
 }))``;
 
 const ChevronIcon = styled.svg.attrs(props => ({
-    className: `w-3 h-3 text-gray-500 ${props.opacityIcon ? "text-opacity-30" : ""} ${
-        props.position === "bottom" ? "transform rotate-180" : ""
-    }`
+    className: `w-3 h-3 text-gray-500 ${props.opacityIcon ? "text-opacity-30" : ""} 
+    ${props.position === "bottom" ? "transform rotate-180" : ""}`
 }))``;
