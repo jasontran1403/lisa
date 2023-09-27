@@ -45,7 +45,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/register/:uuid"
+                    path="/register"
                     element={
                         <Guest>
                             <Register />

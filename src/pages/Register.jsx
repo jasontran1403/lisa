@@ -1,8 +1,6 @@
 import Axios from "axios";
-import qs from "qs";
 import React, { useState } from "react";
-import { useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { PrimaryButton } from "../components/buttons";
 import { Input } from "../components/field";
@@ -13,75 +11,42 @@ import AuthLayout from "../layouts/AuthLayout";
 
 const Register = () => {
     const navigate = useNavigate();
-    const [alreadyRegis, setAlreadyRegis] = useState(false);
-    const { uuid } = useParams();
-    const [side, setSide] = useState("");
-
-    var configPlacement = useMemo(
-        () =>
-            (configPlacement = {
-                method: "get",
-                url: `${env}/api/affiliate/${uuid}`
-            }),
-        [uuid]
-    );
-
-    useEffect(() => {
-        Axios(configPlacement)
-            .then(response => {
-                setRootUsername(response.data.root);
-                setPlacement(response.data.placement);
-                setAlreadyRegis(response.data.status);
-                setSide(response.data.side);
-                if (response.data.status) {
-                    toast("error", "This placement has been registered...");
-                    navigate("/login");
-                }
-            })
-            .catch(() => {
-                toast("error", "This ref link is invalid");
-            });
-    }, [configPlacement, navigate]);
 
     const defaultMessage = {
+        firstname: [],
+        lastname: [],
         email: [],
-        username: [],
-        fullname: [],
         password: [],
-        root: [],
-        placement: [],
-        alreadyRegis: []
+        refferal: [],
+        code: []
     };
 
     const [loading, setLoading] = useState(false);
-    const [username, setUsername] = useState("");
-    const [fullname, setFullname] = useState("");
+    const [firstname, setFirstname] = useState("");
+    const [lastname, setLastname] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [rootUsername, setRootUsername] = useState("");
-    const [placement, setPlacement] = useState("");
+    const [refferal, setRefferal] = useState("");
+    const [code, setCode] = useState("");
+    const [balance] = useState(0);
     const [errorMessage, setErrorMessage] = useState(defaultMessage);
 
     let regEmail =
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
     let dataforRegis = JSON.stringify({
-        id: 0,
-        name: fullname,
-        username: username,
-        password: password,
+        firstname: firstname,
+        lastname: lastname,
         email: email,
-        roles: [],
-        rootUsername: rootUsername,
-        placement: placement,
-        side: side,
-        leftref: "",
-        rightref: ""
+        password: password,
+        refferal: refferal,
+        code: code,
+        balance: balance
     });
 
     let configRegis = {
         method: "post",
-        url: `${env}/api/user/regis`,
+        url: `${env}/api/v1/auth/register`,
         headers: {
             "Content-Type": "application/json"
         },
@@ -94,90 +59,57 @@ const Register = () => {
             const newErrorMessage = defaultMessage;
             if (email === "") {
                 newErrorMessage.email = ["This field is required"];
+                return;
+            } else if (!regEmail.test(email)) {
+                newErrorMessage.email = ["Invalid email pattern"];
+                return;
             }
             if (password === "") {
                 newErrorMessage.password = ["This field is required"];
+                return;
             }
-            if (fullname === "") {
+            if (firstname === "") {
                 newErrorMessage.fullname = ["This field is required"];
+                return;
             }
-            if (username === "") {
+            if (lastname === "") {
                 newErrorMessage.username = ["This field is required"];
+                return;
             }
-            if (rootUsername === "") {
-                newErrorMessage.rootUsername = ["This field is required"];
+            if (refferal === "") {
+                newErrorMessage.refferal = ["This field is required"];
+                return;
             }
-            if (placement === "") {
-                newErrorMessage.placement = ["This field is required"];
-            }
-
-            if (!regEmail.test(email)) {
-                newErrorMessage.email = ["Invalid email pattern"];
-            }
-
-            if (alreadyRegis) {
-                toast("error", "This placement already registered");
+            if (code === "") {
+                newErrorMessage.code = ["This field is required"];
+                return;
             }
 
-            if (
-                email &&
-                fullname &&
-                username &&
-                password &&
-                rootUsername &&
-                placement &&
-                alreadyRegis == false
-            ) {
-                Axios(configRegis)
-                    .then(() => {
-                        let configRegistered = {
-                            method: "put",
-                            url: `${env}/api/affiliate/${uuid}`
-                        };
-                        Axios(configRegistered).catch(error => {
-                            console.log(error);
-                        });
-                        toast("success", "Successful registration");
-                        navigate("/login");
+            if (email && firstname && lastname && password && refferal && code) {
+                Axios.request(configRegis)
+                    .then(response => {
+                        if (response.status === 200) {
+                            toast("success", "Successful registration");
+                            navigate("/login");
+                        } else if (response.status === 226) {
+                            if (response.data.message === "Mã giới thiệu này đã tồn tại!") {
+                                toast("error", `Mã giới thiệu ${code} đã tồn tại!`);
+                            } else {
+                                toast("error", `Địa chỉ email ${email} đã tồn tại!`);
+                            }
+                        }
                     })
                     .catch(error => {
-                        let message_error = error.response.data.message;
-                        if (message_error.includes("username")) {
-                            toast(
-                                "error",
-                                "This username already exists, please choose other username"
-                            );
-                            newErrorMessage.username = ["This username already exists"];
-                        } else if (message_error.includes("email")) {
-                            toast(
-                                "error",
-                                "Email address already exists, please enter other email address"
-                            );
-                            newErrorMessage.email = ["This email address already exists"];
+                        if (error.response) {
+                            toast("error", error.response.data.message);
+                        } else {
+                            toast("error", "Lỗi hệ thống, vui lòng thử lại sau!");
                         }
                     });
-
-                let dataRef = qs.stringify({
-                    username: placement,
-                    usernameRef: username,
-                    side: side
-                });
-                let configRef = {
-                    method: "put",
-                    url: `${env}/api/user/updateRef`,
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    data: dataRef
-                };
-
-                Axios(configRef).then(response => {
-                    console.log(response.data);
-                });
             } else {
                 setErrorMessage(defaultMessage);
-                setLoading(false);
             }
+            setLoading(false);
         }, 500);
     };
 
@@ -188,34 +120,34 @@ const Register = () => {
             <form className="space-y-5">
                 <div>
                     <Input
-                        label={"Username"}
-                        id="username"
+                        label={"Tên"}
+                        id="firstname"
                         type="text"
-                        placeholder="Enter username"
-                        value={username}
-                        onChange={e => setUsername(e.target.value)}
-                        error={errorMessage.username}
+                        placeholder="Điền tên"
+                        value={firstname}
+                        onChange={e => setFirstname(e.target.value)}
+                        error={errorMessage.firstname}
                     />
                 </div>
 
                 <div>
                     <Input
-                        label={"Fullname"}
-                        id="fullname"
+                        label={"Họ"}
+                        id="lastname"
                         type="text"
-                        placeholder="Enter fullname"
-                        value={fullname}
-                        onChange={e => setFullname(e.target.value)}
-                        error={errorMessage.fullname}
+                        placeholder="Điền họ (và tên đệm)"
+                        value={lastname}
+                        onChange={e => setLastname(e.target.value)}
+                        error={errorMessage.lastname}
                     />
                 </div>
 
                 <div>
                     <Input
-                        label={"Email"}
+                        label={"Địa chỉ Email"}
                         id="email"
                         type="email"
-                        placeholder="Enter email"
+                        placeholder="Điền địa chỉ email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         error={errorMessage.email}
@@ -224,10 +156,10 @@ const Register = () => {
 
                 <div>
                     <Input
-                        label={"Password"}
+                        label={"Mật khẩu"}
                         id="password"
                         type="password"
-                        placeholder="Enter password"
+                        placeholder="Điền mật khẩu"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         error={errorMessage.password}
@@ -236,27 +168,25 @@ const Register = () => {
 
                 <div>
                     <Input
-                        label={"Root Username"}
-                        id="rootUsername"
+                        label={"Mã giới thiệu của bạn"}
+                        id="code"
                         type="text"
-                        placeholder="Enter root"
-                        value={rootUsername}
-                        onChange={e => setRootUsername(e.target.value)}
-                        error={errorMessage.rootUsername}
-                        disabled="disabled"
+                        placeholder="Điền mã giới thiệu của bạn"
+                        value={code}
+                        onChange={e => setCode(e.target.value)}
+                        error={errorMessage.code}
                     />
                 </div>
 
                 <div>
                     <Input
-                        label={"Placement"}
-                        id="placement"
+                        label={"Mã của người giới thiệu"}
+                        id="refferal"
                         type="text"
-                        placeholder="Enter placement"
-                        value={placement}
-                        onChange={e => setPlacement(e.target.value)}
-                        error={errorMessage.placement}
-                        disabled="disabled"
+                        placeholder="Điền mã của người giới thiệu"
+                        value={refferal}
+                        onChange={e => setRefferal(e.target.value)}
+                        error={errorMessage.refferal}
                     />
                 </div>
 
