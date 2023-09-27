@@ -1,5 +1,7 @@
 # Folders
 assets/
 
+**/*.css
+
 # Files
 README.md

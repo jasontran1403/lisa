@@ -59,33 +59,35 @@ const Register = () => {
             const newErrorMessage = defaultMessage;
             if (email === "") {
                 newErrorMessage.email = ["This field is required"];
-                return;
-            } else if (!regEmail.test(email)) {
-                newErrorMessage.email = ["Invalid email pattern"];
-                return;
             }
             if (password === "") {
                 newErrorMessage.password = ["This field is required"];
-                return;
             }
             if (firstname === "") {
                 newErrorMessage.fullname = ["This field is required"];
-                return;
             }
             if (lastname === "") {
                 newErrorMessage.username = ["This field is required"];
-                return;
             }
             if (refferal === "") {
                 newErrorMessage.refferal = ["This field is required"];
-                return;
             }
             if (code === "") {
                 newErrorMessage.code = ["This field is required"];
-                return;
+            }
+            if (!regEmail.test(email)) {
+                newErrorMessage.email = ["Invalid email pattern"];
             }
 
-            if (email && firstname && lastname && password && refferal && code) {
+            if (
+                email &&
+                firstname &&
+                lastname &&
+                password &&
+                refferal &&
+                code &&
+                regEmail.test(email)
+            ) {
                 Axios.request(configRegis)
                     .then(response => {
                         if (response.status === 200) {
