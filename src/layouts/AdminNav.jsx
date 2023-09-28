@@ -180,6 +180,16 @@ const AdminNav = () => {
 
                                     <Menu.Item>
                                         <Link
+                                            to={"/treeview"}
+                                            className="flex items-center space-x-3 px-3 py-2.5 text-sm hover:text-purple-500"
+                                        >
+                                            <span>Network</span>
+                                        </Link>
+                                    </Menu.Item>
+                                    <hr />
+
+                                    <Menu.Item>
+                                        <Link
                                             to={"/profile"}
                                             className="flex items-center space-x-3 px-3 py-2.5 text-sm hover:text-purple-500"
                                         >
