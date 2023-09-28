@@ -4,7 +4,7 @@ import Modal from "react-modal";
 import "../assets/TreeView.css";
 
 import config from "../config";
-// import env from "../helpers/env";
+import env from "../helpers/env";
 import AdminLayout from "../layouts/AdminLayout";
 
 Modal.setAppElement(document.getElementById("root"));
@@ -27,7 +27,7 @@ const TreeView = () => {
             method: "get",
             maxBodyLength: Infinity,
             // ${env} http://localhost:8080
-            url: `{env}/api/v1/demo/get-network/${email}`,
+            url: `${env}/api/v1/demo/get-network/${email}`,
             headers: {
                 Authorization: `Bearer ${access_token}`
             }
