@@ -32,6 +32,8 @@ const Share = () => {
             let config = {
                 method: "post",
                 maxBodyLength: Infinity,
+                // ${env}
+                // url: "http://localhost:8080/api/v1/demo/ib",
                 url: `${env}/api/v1/demo/ib`,
                 headers: {
                     Authorization: `Bearer ${currentAccessToken}`
@@ -52,9 +54,9 @@ const Share = () => {
                         toast("error", response.data);
                     }
                 })
-                .catch(() => {
+                .catch(error => {
                     setLoading(false);
-                    toast("error", "Lỗi khi xử lý file Excel, vui lòng bỏ chế độ Protected!");
+                    console.log(">>> error ", error);
                 });
         } catch (error) {
             setLoading(false);

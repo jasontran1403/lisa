@@ -27,6 +27,9 @@ const ReloadAccount = () => {
 
             const fetchData = async () => {
                 const response = await Axios.request(config);
+                if (response.data.length === 0) {
+                    return;
+                }
                 setData(
                     response.data.map(item => {
                         return {
