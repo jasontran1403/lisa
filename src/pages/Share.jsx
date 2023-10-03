@@ -32,7 +32,6 @@ const Share = () => {
             let config = {
                 method: "post",
                 maxBodyLength: Infinity,
-                // ${env}
                 // url: "http://localhost:8080/api/v1/demo/ib",
                 url: `${env}/api/v1/demo/ib`,
                 headers: {
